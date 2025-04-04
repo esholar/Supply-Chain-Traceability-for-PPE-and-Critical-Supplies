@@ -6,12 +6,12 @@ const mockClarity = {
     sender: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
   },
   contracts: {
-    'authenticity-verification': {
+    'manufacturer-verification': {
       functions: {
-        'register-batch': vi.fn(),
-        'verify-product': vi.fn(),
-        'get-batch-details': vi.fn(),
-        'get-verification-history': vi.fn(),
+        'register-manufacturer': vi.fn(),
+        'revoke-manufacturer': vi.fn(),
+        'is-verified-manufacturer': vi.fn(),
+        'get-manufacturer-details': vi.fn(),
         'transfer-ownership': vi.fn(),
       }
     }
@@ -21,68 +21,54 @@ const mockClarity = {
 // Setup global mock
 vi.mock('clarity-environment', () => mockClarity, { virtual: true });
 
-describe('Authenticity Verification Contract', () => {
-  const contract = mockClarity.contracts['authenticity-verification'];
+describe('Manufacturer Verification Contract', () => {
+  const contract = mockClarity.contracts['manufacturer-verification'];
   
   beforeEach(() => {
     // Reset mocks
     vi.resetAllMocks();
   });
   
-  it('should register a batch successfully', async () => {
-    const batchId = 'BATCH-001';
-    const productId = 'N95-MASK-001';
-    const productionDate = 20230101;
-    const quantity = 10000;
-    const verificationCode = new Uint8Array(32).fill(1); // Mock verification code
+  it('should register a manufacturer successfully', async () => {
+    const manufacturerAddress = 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG';
+    const name = 'Acme PPE Manufacturers';
+    const registrationNumber = 'REG123456';
     
-    contract.functions['register-batch'].mockReturnValue({ value: true });
+    contract.functions['register-manufacturer'].mockReturnValue({ value: true });
     
-    const result = await contract.functions['register-batch'](
-        batchId,
-        productId,
-        productionDate,
-        quantity,
-        verificationCode
+    const result = await contract.functions['register-manufacturer'](
+        manufacturerAddress,
+        name,
+        registrationNumber
     );
     
     expect(result.value).toBe(true);
-    expect(contract.functions['register-batch']).toHaveBeenCalledWith(
-        batchId,
-        productId,
-        productionDate,
-        quantity,
-        verificationCode
+    expect(contract.functions['register-manufacturer']).toHaveBeenCalledWith(
+        manufacturerAddress,
+        name,
+        registrationNumber
     );
   });
   
-  it('should verify a product successfully', async () => {
-    const batchId = 'BATCH-001';
-    const verificationCode = new Uint8Array(32).fill(1); // Mock verification code
+  it('should verify a manufacturer correctly', async () => {
+    const manufacturerAddress = 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG';
     
-    contract.functions['verify-product'].mockReturnValue({ value: true });
+    contract.functions['is-verified-manufacturer'].mockReturnValue({ value: true });
     
-    const result = await contract.functions['verify-product'](batchId, verificationCode);
+    const result = await contract.functions['is-verified-manufacturer'](manufacturerAddress);
     
     expect(result.value).toBe(true);
-    expect(contract.functions['verify-product']).toHaveBeenCalledWith(batchId, verificationCode);
+    expect(contract.functions['is-verified-manufacturer']).toHaveBeenCalledWith(manufacturerAddress);
   });
   
-  it('should get batch details', async () => {
-    const batchId = 'BATCH-001';
-    const mockBatchData = {
-      manufacturer: 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG',
-      productId: 'N95-MASK-001',
-      productionDate: 20230101,
-      quantity: 10000,
-      verificationCode: new Uint8Array(32).fill(1)
-    };
+  it('should revoke a manufacturer verification', async () => {
+    const manufacturerAddress = 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG';
     
-    contract.functions['get-batch-details'].mockReturnValue(mockBatchData);
+    contract.functions['revoke-manufacturer'].mockReturnValue({ value: true });
     
-    const result = await contract.functions['get-batch-details'](batchId);
+    const result = await contract.functions['revoke-manufacturer'](manufacturerAddress);
     
-    expect(result).toEqual(mockBatchData);
-    expect(contract.functions['get-batch-details']).toHaveBeenCalledWith(batchId);
+    expect(result.value).toBe(true);
+    expect(contract.functions['revoke-manufacturer']).toHaveBeenCalledWith(manufacturerAddress);
   });
 });
